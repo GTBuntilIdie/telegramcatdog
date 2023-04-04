@@ -28,16 +28,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static pro.sky.telegramcatdog.constants.Constants.*;
+import static pro.sky.telegramcatdog.constants.DocType.*;
 import static pro.sky.telegramcatdog.constants.PetType.CAT;
 import static pro.sky.telegramcatdog.constants.PetType.DOG;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
-    private UpdateStatus updateStatus = UpdateStatus.DEFAULT;
-    public void setUpdateStatus(UpdateStatus updateStatus) {
-        this.updateStatus = updateStatus;
-    }
 
+    private UpdateStatus updateStatus = UpdateStatus.DEFAULT;
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private TelegramBot telegramBot;
 
@@ -47,6 +45,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     public void setShelterType(PetType shelterType) {
         this.shelterType = shelterType;
+    }
+
+    public void setUpdateStatus(UpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
+    public UpdateStatus getUpdateStatus() {
+        return updateStatus;
     }
 
     private PetType shelterType;
@@ -96,6 +102,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     /**
      * Creates buttons for the shelter type selection message (reply to the /start command)
+     *
      * @return {@code InlineKeyboardMarkup}
      */
     private InlineKeyboardMarkup createButtonsShelterTypeSelect() {
@@ -107,6 +114,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     /**
      * Creates buttons for the reply message to the shelter type selection (Stage 0)
+     *
      * @return {@code InlineKeyboardMarkup}
      */
     private InlineKeyboardMarkup createButtonsStage0() {
@@ -182,18 +190,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         if (updateStatus == UpdateStatus.WAITING_FOR_PET_PICTURE) {
             saveAdoptionReportPhoto(update);
+            updateStatus = UpdateStatus.WAITING_FOR_PET_DIET;
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_PET_DIET) {
             saveAdoptionReportDiet(update);
+            updateStatus = UpdateStatus.WAITING_FOR_WELL_BEING;
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_WELL_BEING) {
             saveAdoptionReportWellBeing(update);
+            updateStatus = UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE;
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE) {
             saveAdoptionReportBehaviorChange(update);
+            updateStatus = UpdateStatus.DEFAULT;
             return;
         }
 
@@ -264,6 +276,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     sendMessage(instructionMessage);
                     break;
                 case BUTTON_SEND_REPORT_CALLBACK_TEXT:
+                    updateStatus = UpdateStatus.WAITING_FOR_PET_PICTURE;
                     saveAdoptionReport(chatId);
                     break;
                 case BUTTON_SHARE_CONTACT_CALLBACK_TEXT:
@@ -418,6 +431,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     /**
      * Processing request: How to adopt a dog/cat (stage 2)
+     *
      * @param chatId
      */
     private void processStage2Click(long chatId, Update update) {
@@ -439,66 +453,97 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (shelterType == null) {
             return;
         }
-        String messageText = switch (shelterType) {
-            case DOG -> adoptionDocRepository.findById(1).orElse(null).getDescription();
-            case CAT -> adoptionDocRepository.findById(2).orElse(null).getDescription();
-        };
-        SendMessage message = new SendMessage(chatId, messageText);
-        // Adding buttons
-        sendMessage(message);
+        AdoptionDoc doc = null;
+        switch (shelterType) {
+            case DOG:
+                doc = adoptionDocRepository.findById(INFO_MEETING_DOG).orElse(null);
+                break;
+            case CAT:
+                doc = adoptionDocRepository.findById(INFO_MEETING_CAT).orElse(null);
+                break;
+        }
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processListOfDocsClick(long chatId) {
-        String messageText = adoptionDocRepository.findById(3).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(LIST_OF_DOCS).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processTransportAnimal(long chatId) {
-        String messageText = adoptionDocRepository.findById(4).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(TRANSPORT_ANIMAL).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processRecForLittle(long chatId) {
-        String messageText = adoptionDocRepository.findById(5).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(REC_FOR_LITTLE).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processRecForAdult(long chatId) {
-        String messageText = adoptionDocRepository.findById(6).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(REC_FOR_ADULT).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processRecForDisable(long chatId) {
-        String messageText = adoptionDocRepository.findById(7).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(REC_FOR_DISABLE).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processKinologAdvices(long chatId) {
-        String messageText = adoptionDocRepository.findById(8).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(KINOLOG_ADVICES).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processRecKinologs(long chatId) {
-        String messageText = adoptionDocRepository.findById(9).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(REC_KINOLOGS).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     private void processReasonsRefusal(long chatId) {
-        String messageText = adoptionDocRepository.findById(10).orElse(null).getDescription();
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(message);
+        AdoptionDoc doc = adoptionDocRepository.findById(REASONS_REFUSAL).orElse(null);
+        if (doc != null) {
+            String messageText = doc.getDescription();
+            SendMessage message = new SendMessage(chatId, messageText);
+            sendMessage(message);
+        }
     }
 
     /**
      * Processing request: Send a follow-up report (stage 3)
+     *
      * @param chatId
      */
     private void processStage3Click(long chatId) {
@@ -599,10 +644,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         AdoptionReport adoptionReport = adoptionReportRepository.findAdoptionReportByAdopterIdAndReportDate(adopterId, date);
         if (adoptionReport == null) {
-            adoptionReport = new AdoptionReport(adopterId, date, null, null,null, null, updateStatus);
-            adoptionReport.setUpdateStatus(UpdateStatus.WAITING_FOR_PET_PICTURE);
+            adoptionReport = new AdoptionReport(adopterId, date, null, null, null, null);
             adoptionReportRepository.save(adoptionReport);
-            updateStatus = adoptionReport.getUpdateStatus();
             SendMessage requestPhotoMessage = new SendMessage(chatId, PHOTO_WAITING_MESSAGE);
             sendMessage(requestPhotoMessage);
         }
@@ -621,9 +664,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.message().photo() != null) {
             byte[] image = getPhoto(update);
             adoptionReport.setPicture(image);
-            adoptionReport.setUpdateStatus(UpdateStatus.WAITING_FOR_PET_DIET);
             adoptionReportRepository.save(adoptionReport);
-            updateStatus = adoptionReport.getUpdateStatus();
             SendMessage savePhotoMessage = new SendMessage(chatId, PHOTO_SAVED_MESSAGE);
             sendMessage(savePhotoMessage);
         }
@@ -638,9 +679,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (diet == null) {
             String newDiet = update.message().text();
             adoptionReport.setDiet(newDiet);
-            adoptionReport.setUpdateStatus(UpdateStatus.WAITING_FOR_WELL_BEING);
             adoptionReportRepository.save(adoptionReport);
-            updateStatus = adoptionReport.getUpdateStatus();
             SendMessage saveDietMessage = new SendMessage(chatId, DIET_SAVED_MESSAGE);
             sendMessage(saveDietMessage);
         }
@@ -655,9 +694,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (wellBeing == null) {
             String newWellBeing = update.message().text();
             adoptionReport.setWellBeing(newWellBeing);
-            adoptionReport.setUpdateStatus(UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE);
             adoptionReportRepository.save(adoptionReport);
-            updateStatus = adoptionReport.getUpdateStatus();
             SendMessage saveWellBeingMessage = new SendMessage(chatId, WELL_BEING_SAVED_MESSAGE);
             sendMessage(saveWellBeingMessage);
         }
@@ -672,9 +709,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (behaviorChane == null) {
             String newBehaviorChane = update.message().text();
             adoptionReport.setBehaviorChange(newBehaviorChane);
-            adoptionReport.setUpdateStatus(UpdateStatus.DEFAULT);
             adoptionReportRepository.save(adoptionReport);
-            updateStatus = adoptionReport.getUpdateStatus();
             SendMessage saveBehaviorChangeMessage = new SendMessage(chatId, BEHAVIOR_CHANGE_SAVED_MESSAGE);
             sendMessage(saveBehaviorChangeMessage);
         }

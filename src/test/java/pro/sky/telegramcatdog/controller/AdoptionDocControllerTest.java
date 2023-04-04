@@ -15,6 +15,7 @@ import pro.sky.telegramcatdog.model.AdoptionDoc;
 
 import static pro.sky.telegramcatdog.constants.Constants.ADOPTIONDOC_URL;
 import static pro.sky.telegramcatdog.constants.Constants.LOCALHOST_URL;
+import static pro.sky.telegramcatdog.constants.DocType.INFO_MEETING_DOG;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -31,7 +32,7 @@ class AdoptionDocControllerTest {
 
     @Test
     public void createDocTest() {
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "short", "long");
+        AdoptionDoc adoptionDoc = new AdoptionDoc(INFO_MEETING_DOG, "long");
         ResponseEntity<AdoptionDoc> response = getCreateAdoptionDocResponse(adoptionDoc);
         assertCreatedAdoptionDoc(adoptionDoc, response);
     }
@@ -42,13 +43,13 @@ class AdoptionDocControllerTest {
         String newDesc = "Make more fun";
 
         // Create new doc first and check that it was created OK
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, oldDesc, "Something");
+        AdoptionDoc adoptionDoc = new AdoptionDoc(INFO_MEETING_DOG, "Something");
         ResponseEntity<AdoptionDoc> responseCreated = getCreateAdoptionDocResponse(adoptionDoc);
         assertCreatedAdoptionDoc(adoptionDoc, responseCreated);
 
         // Modify the created doc
         AdoptionDoc createdDoc = responseCreated.getBody();
-        createdDoc.setShortDesc(newDesc);
+        createdDoc.setDescription(newDesc);
 
         // Update the modified doc in db
         restTemplate.put(
@@ -63,13 +64,13 @@ class AdoptionDocControllerTest {
         // Check that the updated doc has the same newDesc.
         Assertions.assertThat(response.getBody()).isNotNull();
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        Assertions.assertThat(response.getBody().getShortDesc()).isEqualTo(newDesc);
+        Assertions.assertThat(response.getBody().getDescription()).isEqualTo(newDesc);
     }
 
     @Test
     public void getDocByIdTest() {
         // Create new doc and check that it was created OK
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "short", "Something");
+        AdoptionDoc adoptionDoc = new AdoptionDoc(INFO_MEETING_DOG, "Something");
         ResponseEntity<AdoptionDoc> responseCreated = getCreateAdoptionDocResponse(adoptionDoc);
         assertCreatedAdoptionDoc(adoptionDoc, responseCreated);
 

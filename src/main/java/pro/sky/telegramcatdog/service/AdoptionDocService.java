@@ -1,9 +1,9 @@
 package pro.sky.telegramcatdog.service;
 
 import org.springframework.stereotype.Service;
+import pro.sky.telegramcatdog.constants.DocType;
 import pro.sky.telegramcatdog.exception.AdoptionDocNotFoundException;
 import pro.sky.telegramcatdog.model.AdoptionDoc;
-
 import pro.sky.telegramcatdog.repository.AdoptionDocRepository;
 
 @Service
@@ -18,10 +18,10 @@ public class AdoptionDocService {
         return adoptionDocRepository.save(adoptionDoc);
     }
 
-    public AdoptionDoc readAdoptionDoc(int id) {
+    public AdoptionDoc readAdoptionDoc(DocType id) {
         AdoptionDoc adoptionDoc = adoptionDocRepository.findById(id).orElse(null);
         if (adoptionDoc == null) {
-            throw new AdoptionDocNotFoundException(id);
+            throw new AdoptionDocNotFoundException(id.ordinal());
         }
         return adoptionDoc;
     }

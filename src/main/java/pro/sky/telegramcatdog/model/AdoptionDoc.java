@@ -1,6 +1,9 @@
 package pro.sky.telegramcatdog.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import pro.sky.telegramcatdog.constants.DocType;
 
 import java.util.Objects;
 
@@ -8,18 +11,15 @@ import java.util.Objects;
 @Table(name = "adoption_docs")
 public class AdoptionDoc {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @Column(name = "short_desc")
-    private String shortDesc;
+    private DocType id;
+
     private String description;
 
     public AdoptionDoc() {
     }
 
-    public AdoptionDoc(int id, String shortDesc, String description) {
+    public AdoptionDoc(DocType id, String description) {
         this.id = id;
-        this.shortDesc = shortDesc;
         this.description = description;
     }
 
@@ -36,20 +36,12 @@ public class AdoptionDoc {
         return Objects.hash(id);
     }
 
-    public int getId() {
+    public DocType getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(DocType id) {
         this.id = id;
-    }
-
-    public String getShortDesc() {
-        return shortDesc;
-    }
-
-    public void setShortDesc(String shortDesc) {
-        this.shortDesc = shortDesc;
     }
 
     public String getDescription() {

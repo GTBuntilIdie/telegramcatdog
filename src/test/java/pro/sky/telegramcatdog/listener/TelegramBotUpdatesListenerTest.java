@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pro.sky.telegramcatdog.constants.DocType;
 import pro.sky.telegramcatdog.constants.PetType;
 import pro.sky.telegramcatdog.constants.UpdateStatus;
 import pro.sky.telegramcatdog.model.*;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static pro.sky.telegramcatdog.constants.Constants.*;
+import static pro.sky.telegramcatdog.constants.DocType.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramBotUpdatesListenerTest {
@@ -267,8 +269,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonDocsClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Список документов для усыновления", "Паспорт, еще паспорт и еще паспорт");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(LIST_OF_DOCS, "Паспорт, еще паспорт и еще паспорт");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -287,8 +289,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonInfoMeetingDogClickTest() throws URISyntaxException, IOException {
         telegramBotUpdatesListener.setShelterType(PetType.DOG);
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Правила знакомства с собакой", "Бла бла бла, встреться, обнимите и все такое");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(INFO_MEETING_DOG, "Бла бла бла, встреться, обнимите и все такое");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
         Update update = getUpdateMessage(json, BUTTON_RULES_MEETING_ANIMAL_CALLBACK_TEXT);
@@ -306,8 +308,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonInfoMeetingCatClickTest() throws URISyntaxException, IOException {
         telegramBotUpdatesListener.setShelterType(PetType.CAT);
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Правила знакомства с кошкой", "Бла бла, встретьте кошку");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(INFO_MEETING_CAT, "Бла бла, встретьте кошку");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
         Update update = getUpdateMessage(json, BUTTON_RULES_MEETING_ANIMAL_CALLBACK_TEXT);
@@ -325,8 +327,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecForTransportClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Рекомендации по транспортировке животного", "Перевозить в теплой коробке из под пиццы");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(TRANSPORT_ANIMAL, "Перевозить в теплой коробке из под пиццы");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -345,8 +347,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecHouseForLittleClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Рекомендации по обустройству дома для молодого животного", "Обустроить дом, конец");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(REC_FOR_LITTLE, "Обустроить дом, конец");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -365,8 +367,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecHouseForAdultClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Рекомендации по обустройству дома для взрослого животного", "Обустроить дом получше");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(REC_FOR_ADULT, "Обустроить дом получше");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -385,8 +387,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecHouseForInvalidClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Рекомендации для животного с ограниченными возможностями", "Помочь");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(REC_FOR_DISABLE, "Помочь");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -405,8 +407,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecFromKinologsClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Советы кинолога по общению с собакой", "Тут советы кинолога");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(KINOLOG_ADVICES, "Тут советы кинолога");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -425,8 +427,8 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void handleButtonRecKinologsClickTest() throws URISyntaxException, IOException {
 
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Рекомендации по проверенным кинологам", "Кабачок и баклажан");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(REC_KINOLOGS, "Кабачок и баклажан");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
@@ -444,8 +446,8 @@ class TelegramBotUpdatesListenerTest {
 
     @Test
     public void handleButtonReasonRefusalClickTest() throws URISyntaxException, IOException {
-        AdoptionDoc adoptionDoc = new AdoptionDoc(1, "Причины отказа в усыновлении", "Бывает");
-        when(adoptionDocRepository.findById(any(Integer.class))).thenReturn(Optional.of(adoptionDoc));
+        AdoptionDoc adoptionDoc = new AdoptionDoc(REASONS_REFUSAL, "Бывает");
+        when(adoptionDocRepository.findById(any(DocType.class))).thenReturn(Optional.of(adoptionDoc));
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("data_update.json").toURI()));
