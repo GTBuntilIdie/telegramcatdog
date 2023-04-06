@@ -17,6 +17,7 @@ import pro.sky.telegramcatdog.constants.PetType;
 import pro.sky.telegramcatdog.constants.UpdateStatus;
 import pro.sky.telegramcatdog.model.*;
 import pro.sky.telegramcatdog.repository.*;
+import pro.sky.telegramcatdog.service.AdopterService;
 import pro.sky.telegramcatdog.service.VolunteerService;
 
 import java.io.IOException;
@@ -59,6 +60,9 @@ class TelegramBotUpdatesListenerTest {
 
     @Mock
     private VolunteerService volunteerService;
+
+    @Mock
+    private AdopterService adopterService;
 
     /* Testing '/start' command when it is a new guest (unknown guest). */
     @Test
@@ -568,26 +572,26 @@ class TelegramBotUpdatesListenerTest {
 
     @Test
     public void handleSaveAdoptionReportDiet() throws URISyntaxException, IOException {
-        telegramBotUpdatesListener.setUpdateStatus(UpdateStatus.WAITING_FOR_PET_DIET);
-
         Long chatId = 1122334455L;
         LocalDate today = LocalDate.now();
+
         Adopter adopter = new Adopter(1,
                 "Vasya",
                 "Pupkin",
                 "+79101234567",
                 1122334455,
                 "@vasya_pupkin");
+
         AdoptionReport adoptionReport = new AdoptionReport(adopter,
                 today,
                 null,
                 null,
                 null,
-                null,
-                UpdateStatus.WAITING_FOR_PET_DIET);
+                null);
 
         when(adoptionReportRepository.findAdoptionReportByAdopterIdAndReportDate(any(Adopter.class), any(LocalDate.class))).thenReturn(adoptionReport);
         when(adopterRepository.findByChatId(any(Long.class))).thenReturn(adopter);
+        when(adopterService.getUpdateStatus(any(Long.class))).thenReturn(UpdateStatus.WAITING_FOR_PET_DIET);
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("text_update.json").toURI()));
@@ -605,28 +609,26 @@ class TelegramBotUpdatesListenerTest {
 
     @Test
     public void handleSaveAdoptionReportWellBeing() throws URISyntaxException, IOException {
-        telegramBotUpdatesListener.setUpdateStatus(UpdateStatus.WAITING_FOR_WELL_BEING);
-
         Long chatId = 1122334455L;
         LocalDate today = LocalDate.now();
+
         Adopter adopter = new Adopter(1,
                 "Vasya",
                 "Pupkin",
                 "+79101234567",
                 1122334455,
                 "@vasya_pupkin");
-        AdoptionReport adoptionReport = new AdoptionReport(
-                adopter,
+
+        AdoptionReport adoptionReport = new AdoptionReport(adopter,
                 today,
                 null,
                 null,
                 null,
-                null,
-                UpdateStatus.DEFAULT);
+                null);
 
         when(adoptionReportRepository.findAdoptionReportByAdopterIdAndReportDate(any(Adopter.class), any(LocalDate.class))).thenReturn(adoptionReport);
         when(adopterRepository.findByChatId(any(Long.class))).thenReturn(adopter);
-
+        when(adopterService.getUpdateStatus(any(Long.class))).thenReturn(UpdateStatus.WAITING_FOR_WELL_BEING);
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("text_update.json").toURI()));
@@ -644,26 +646,26 @@ class TelegramBotUpdatesListenerTest {
 
     @Test
     public void handleSaveAdoptionReportBehaviorChange() throws URISyntaxException, IOException {
-        telegramBotUpdatesListener.setUpdateStatus(UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE);
-
         Long chatId = 1122334455L;
         LocalDate today = LocalDate.now();
+
         Adopter adopter = new Adopter(1,
                 "Vasya",
                 "Pupkin",
                 "+79101234567",
                 1122334455,
                 "@vasya_pupkin");
+
         AdoptionReport adoptionReport = new AdoptionReport(adopter,
                 today,
                 null,
                 null,
                 null,
-                null,
-                UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE);
+                null);
 
         when(adoptionReportRepository.findAdoptionReportByAdopterIdAndReportDate(any(Adopter.class), any(LocalDate.class))).thenReturn(adoptionReport);
         when(adopterRepository.findByChatId(any(Long.class))).thenReturn(adopter);
+        when(adopterService.getUpdateStatus(any(Long.class))).thenReturn(UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE);
 
         String json = Files.readString(
                 Paths.get(TelegramBotUpdatesListenerTest.class.getResource("text_update.json").toURI()));
