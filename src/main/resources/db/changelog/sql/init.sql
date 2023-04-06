@@ -136,3 +136,6 @@ ALTER COLUMN report_date TYPE DATE;
 ALTER TABLE adoption_docs DROP COLUMN IF EXISTS short_desc;
 ALTER TABLE adoption_docs ALTER COLUMN id SET DATA TYPE INT;
 DROP SEQUENCE IF EXISTS adoption_docs_id_seq CASCADE;
+
+-- changeset alexeym75:12
+ALTER TABLE adopters ADD COLUMN IF NOT EXISTS update_status INT;

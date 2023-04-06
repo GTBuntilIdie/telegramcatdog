@@ -2,6 +2,7 @@ package pro.sky.telegramcatdog.model;
 
 import jakarta.persistence.*;
 import pro.sky.telegramcatdog.constants.AdopterStatus;
+import pro.sky.telegramcatdog.constants.UpdateStatus;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -25,6 +26,9 @@ public class Adopter {
     private String username;
     private int volunteerId;
     private AdopterStatus status;
+
+    @Column(name = "update_status")
+    private UpdateStatus updateStatus;
 
     @OneToMany(mappedBy = "adopterId")
     private Collection<Pet> pets;
@@ -141,5 +145,13 @@ public class Adopter {
 
     public String getUsername() {
         return username;
+    }
+
+    public UpdateStatus getUpdateStatus() {
+        return updateStatus;
+    }
+
+    public void setUpdateStatus(UpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
     }
 }

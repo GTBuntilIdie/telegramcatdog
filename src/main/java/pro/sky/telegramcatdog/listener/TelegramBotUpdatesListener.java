@@ -20,6 +20,7 @@ import pro.sky.telegramcatdog.constants.PetType;
 import pro.sky.telegramcatdog.constants.UpdateStatus;
 import pro.sky.telegramcatdog.model.*;
 import pro.sky.telegramcatdog.repository.*;
+import pro.sky.telegramcatdog.service.AdopterService;
 import pro.sky.telegramcatdog.service.VolunteerService;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ import static pro.sky.telegramcatdog.constants.PetType.DOG;
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
-    private UpdateStatus updateStatus = UpdateStatus.DEFAULT;
+    private UpdateStatus updateStatus;
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private TelegramBot telegramBot;
 
@@ -47,14 +48,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         this.shelterType = shelterType;
     }
 
-    public void setUpdateStatus(UpdateStatus updateStatus) {
-        this.updateStatus = updateStatus;
-    }
-
-    public UpdateStatus getUpdateStatus() {
-        return updateStatus;
-    }
-
     private PetType shelterType;
     private final GuestRepository guestRepository;
     private final AdopterRepository adopterRepository;
@@ -62,8 +55,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final AdoptionReportRepository adoptionReportRepository;
     private final BranchParamsRepository branchParamsRepository;
     private final VolunteerService volunteerService;
+    private final AdopterService adopterService;
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, GuestRepository guestRepository, AdopterRepository adopterRepository, AdoptionDocRepository adoptionDocRepository, AdoptionReportRepository adoptionReportRepository, BranchParamsRepository branchParamsRepository, VolunteerService volunteerService) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, GuestRepository guestRepository, AdopterRepository adopterRepository, AdoptionDocRepository adoptionDocRepository, AdoptionReportRepository adoptionReportRepository, BranchParamsRepository branchParamsRepository, VolunteerService volunteerService, AdopterService adopterService) {
         this.telegramBot = telegramBot;
         this.guestRepository = guestRepository;
         this.adopterRepository = adopterRepository;
@@ -71,6 +65,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         this.adoptionReportRepository = adoptionReportRepository;
         this.branchParamsRepository = branchParamsRepository;
         this.volunteerService = volunteerService;
+        this.adopterService = adopterService;
     }
 
     @PostConstruct
@@ -188,24 +183,29 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             return;
         }
 
+        long chatId = update.message().chat().id();
+
+        // Read updateStatus for the current adopter
+        updateStatus = adopterService.getUpdateStatus(chatId);
+
         if (updateStatus == UpdateStatus.WAITING_FOR_PET_PICTURE) {
             saveAdoptionReportPhoto(update);
-            updateStatus = UpdateStatus.WAITING_FOR_PET_DIET;
+            adopterService.setUpdateStatus(chatId, UpdateStatus.WAITING_FOR_PET_DIET);
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_PET_DIET) {
             saveAdoptionReportDiet(update);
-            updateStatus = UpdateStatus.WAITING_FOR_WELL_BEING;
+            adopterService.setUpdateStatus(chatId, UpdateStatus.WAITING_FOR_WELL_BEING);
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_WELL_BEING) {
             saveAdoptionReportWellBeing(update);
-            updateStatus = UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE;
+            adopterService.setUpdateStatus(chatId, UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE);
             return;
         }
         if (updateStatus == UpdateStatus.WAITING_FOR_BEHAVIOR_CHANGE) {
             saveAdoptionReportBehaviorChange(update);
-            updateStatus = UpdateStatus.DEFAULT;
+            adopterService.setUpdateStatus(chatId, UpdateStatus.DEFAULT);
             return;
         }
 
@@ -276,7 +276,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     sendMessage(instructionMessage);
                     break;
                 case BUTTON_SEND_REPORT_CALLBACK_TEXT:
-                    updateStatus = UpdateStatus.WAITING_FOR_PET_PICTURE;
                     saveAdoptionReport(chatId);
                     break;
                 case BUTTON_SHARE_CONTACT_CALLBACK_TEXT:
@@ -628,6 +627,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             Adopter adopter = adopterRepository.findByChatId(chatId);
             if (adopter == null) {
                 adopter = new Adopter(firstName, lastName, phone1, chatId, username);
+                adopter.setUpdateStatus(UpdateStatus.DEFAULT);
                 adopterRepository.save(adopter);
                 SendMessage message = new SendMessage(chatId, SAVE_ADOPTER_SUCCESS_TEXT + ' ' + WE_WILL_CALL_YOU_TEXT);
                 sendMessage(message.replyMarkup(createMainMenuKeyboardButtons()));
@@ -646,6 +646,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (adoptionReport == null) {
             adoptionReport = new AdoptionReport(adopterId, date, null, null, null, null);
             adoptionReportRepository.save(adoptionReport);
+            adopterService.setUpdateStatus(chatId, UpdateStatus.WAITING_FOR_PET_PICTURE);
             SendMessage requestPhotoMessage = new SendMessage(chatId, PHOTO_WAITING_MESSAGE);
             sendMessage(requestPhotoMessage);
         }

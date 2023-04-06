@@ -1,6 +1,7 @@
 package pro.sky.telegramcatdog.service;
 
 import org.springframework.stereotype.Service;
+import pro.sky.telegramcatdog.constants.UpdateStatus;
 import pro.sky.telegramcatdog.exception.AdopterNotFoundException;
 import pro.sky.telegramcatdog.model.Adopter;
 import pro.sky.telegramcatdog.repository.AdopterRepository;
@@ -30,5 +31,22 @@ public class AdopterService {
             return null;
         }
         return adopterRepository.save(adopter);
+    }
+
+    public UpdateStatus getUpdateStatus(long chatId) {
+        Adopter adopter = adopterRepository.findByChatId(chatId);
+        if (adopter == null) {
+            throw new AdopterNotFoundException(chatId);
+        }
+        return adopter.getUpdateStatus();
+    }
+
+    public void setUpdateStatus(long chatId, UpdateStatus updateStatus) {
+        Adopter adopter = adopterRepository.findByChatId(chatId);
+        if (adopter == null) {
+            throw new AdopterNotFoundException(chatId);
+        }
+        adopter.setUpdateStatus(updateStatus);
+        adopterRepository.save(adopter);
     }
 }
